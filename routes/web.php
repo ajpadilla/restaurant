@@ -17,7 +17,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('orders', 'OrderController@create');
 Route::post('orders', 'OrderController@store')->name('orders.store');
 Route::get('orders/created', 'OrderController@index')->name('orders.index');
 Route::get('orders/process', 'OrderController@process')->name('orders.process');
