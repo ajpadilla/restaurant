@@ -44,6 +44,13 @@ class OrderController extends Controller
      */
     protected $kitchenService;
 
+    /**
+     * @param OrderRepository $orderRepository
+     * @param IngredientRepository $ingredientRepository
+     * @param WareHouseClientService $wareHouseClientService
+     * @param PlateRepository $plateRepository
+     * @param kitchenService $kitchenService
+     */
     public function __construct(
         OrderRepository        $orderRepository,
         IngredientRepository   $ingredientRepository,
@@ -59,35 +66,10 @@ class OrderController extends Controller
         $this->kitchenService = $kitchenService;
     }
 
-    public function create(Request $request)
-    {
-       // $this->ingredientRepository->create(['name' => 'Tomato', 'quantity' => 10]);
-        //return $this->ingredientRepository->search([])->paginate(5);
-       // return "OrderController::create";
-
-       // $response = $this->wareHouseClientService->getAllIngredients();
-
-        //$response = $this->wareHouseClientService->increaseIngredients(['name' => 'chicken' ,'quantity' => 5]);
-
-        //$response = $this->wareHouseClientService->decreaseIngredients(['name' => 'chicken' ,'quantity' => 5]);
-
-        //$response = $this->wareHouseClientService->makePurchase(['description' => 'Compra', 'product_name' => 'chicken', 'quantity' => 8]);
-
-        //$response = $this->wareHouseClientService->getAllPurchases();
-
-        //$response = $this->wareHouseClientService->buyIngredient('onion');
-
-        //$response = $this->wareHouseClientService->getIngredient('meat');
-
-        //var_dump($response->quantitySold);
-
-        //return view('layouts.pages.home');
-
-        $order = $this->orderRepository->getById(1);
-
-        $this->kitchenService->prepareDish($order);
-    }
-
+    /**
+     * @param Request $request
+     * @return Application|Factory|View
+     */
     public function index(Request $request)
     {
         $orders = $this->orderRepository->search(['status' => 'CREATED'])->get();
@@ -106,6 +88,10 @@ class OrderController extends Controller
         return view('layouts.pages.orders', compact('orders'));
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         try {
