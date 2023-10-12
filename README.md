@@ -1,5 +1,5 @@
 ## Herramientas necesarias
-El proyecto restaurant depende de las apis expuestas en el proyecto warehose ```https://github.com/ajpadilla/warehouse``, asegure levantar el entorno de trabajo para dicho proyecto y poder utilizar las apis que expone.
+El proyecto restaurant depende de las apis expuestas en el proyecto warehose https://github.com/ajpadilla/warehouse, asegure levantar el entorno de trabajo para dicho proyecto y poder utilizar las apis que expone.
 
 Instalar Docker
 
@@ -15,7 +15,7 @@ Ejecute  ```docker-compose build``` para levantar los contenedores del proyecto
 Abra el contenedor de la app ejecutando ```docker-compose exec app sh``` e instale todas las dependencias con el siguiente comando: ``` composer install```, crear nueva key dentro del contenedor app
 ``` php artisan key:generate```,.
 
-Luego ir a `http://localhost:8081/` para poder acceder a las apis expuestas en este proyecto.
+Luego ir a `http://localhost:8080/` para poder acceder a las apis expuestas en este proyecto.
 
 ## Ejecutar Migraciones, Seed dentro del contenedor app
 
