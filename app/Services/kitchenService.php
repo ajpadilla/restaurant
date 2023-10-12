@@ -44,6 +44,7 @@ class kitchenService
        } else {
            foreach ($missingIngredients as $missingIngredient) {
                while ($missingIngredient['ingredient_in_ware_house']->quantity < $missingIngredient['ingredient']['quantity']) {
+                   sleep(3);
                    $this->buyIngredients($missingIngredient['ingredient']['name']);
                    $missingIngredient['ingredient_in_ware_house'] = $this->clientService->getIngredient($missingIngredient['ingredient']['name']);
                }

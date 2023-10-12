@@ -54,15 +54,6 @@ class WareHouseClientService
         try {
             /** @var Response $response */
             $response = $this->client->get('api/warehouse/v1/ingredients');
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->getAllIngredients();
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
@@ -82,16 +73,7 @@ class WareHouseClientService
         try {
             /** @var Response $response */
             $response = $this->client->get("api/warehouse/v1/ingredients/{$name}");
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->getIngredient($name);
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
-        } catch (Exception $e) {
+        }  catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
             throw new Exception("Error getting access token");
@@ -112,15 +94,6 @@ class WareHouseClientService
             $response = $this->client->post('api/warehouse/v1/ingredients/increase', [
                 'json' => $data,
             ]);
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->increaseIngredients($data);
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
@@ -136,15 +109,6 @@ class WareHouseClientService
             $response = $this->client->post('api/warehouse/v1/ingredients/list', [
                 'json' => ['name' => $data],
             ]);
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->increaseIngredients($data);
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
@@ -185,15 +149,6 @@ class WareHouseClientService
         try {
             /** @var Response $response */
             $response = $this->client->get('api/warehouse/v1/purchases');
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->getAllPurchases();
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
@@ -215,15 +170,6 @@ class WareHouseClientService
             $response = $this->client->post('api/warehouse/v1/purchases/create', [
                 'json' => $data,
             ]);
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->makePurchase($data);
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
@@ -242,16 +188,7 @@ class WareHouseClientService
         try {
             /** @var Response $response */
             $response = $this->client->get("api/warehouse/v1/ingredients/buy/{$ingredientName}");
-        } catch (ClientException $e) {
-            if ($e->getResponse()->getStatusCode() === 429) {
-                sleep(5);
-                return $this->buyIngredient($ingredientName);
-            } else {
-                logger($e->getMessage());
-                logger($e->getTraceAsString());
-                throw new Exception("Error getting access token");
-            }
-        } catch (Exception $e) {
+        }  catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
             throw new Exception("Error getting access token");
