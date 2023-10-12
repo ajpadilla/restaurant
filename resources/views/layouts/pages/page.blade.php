@@ -104,7 +104,6 @@
                         <button type="submit" class="btn btn-primary">Create Order</button>
                     </div>
                 </form>
-                <!--<a href="{{route('orders.create')}}" class="btn btn-primary"><i class="icon-pencil"></i>orders create</a>-->
                 <a href="{{route('plates.index')}}" class="btn btn-primary"><i class="icon-pencil"></i>List Plates</a>
                 <a href="{{route('orders.index')}}" class="btn btn-primary"><i class="icon-pencil"></i>Orders in progress</a>
                 <a href="{{route('orders.process')}}" class="btn btn-primary"><i class="icon-pencil"></i>Orders process</a>
