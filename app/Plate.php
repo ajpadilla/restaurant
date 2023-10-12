@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Plate extends Model
 {
@@ -14,7 +15,7 @@ class Plate extends Model
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany
      */
     public function ingredients() {
         return $this->belongsToMany(Ingredient::class, 'ingredient_plate');

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
@@ -12,6 +13,9 @@ class Order extends Model
         'status'
     ];
 
+    /**
+     * @return BelongsTo
+     */
     public function plate() {
         return $this->belongsTo(Plate::class);
     }
