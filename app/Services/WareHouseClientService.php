@@ -26,7 +26,7 @@ class WareHouseClientService
     {
         //$this->endpoint = 'http://192.168.16.1:8081';
         //$this->endpoint = 'http://warehouse_nginx';
-        $this->endpoint = env('WAREHOUSE_HOST', 'http://52.90.2.13');
+        $this->endpoint = env('WAREHOUSE_HOST', 'http://warehouse_nginx');
         $this->client = $this->createClient();
     }
 
