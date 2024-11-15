@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\IngredientRepository;
-use App\Repositories\OrderRepository;
-use App\Repositories\PlateRepository;
+use App\Jobs\ProcessOrder;
+use App\Repositories\Order\OrderRepository;
+use App\Repositories\Plate\PlateRepository;
 use App\Services\kitchenService;
 use App\Services\WareHouseClientService;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use App\Jobs\ProcessOrder;
-use Illuminate\Foundation\Bus\DispatchesJobs;
 
 class OrderController extends Controller
 {
@@ -23,11 +22,6 @@ class OrderController extends Controller
      * @var OrderRepository
      */
     protected $orderRepository;
-
-    /**
-     * @var IngredientRepository
-     */
-    protected $ingredientRepository;
 
     /**
      * @var WareHouseClientService
@@ -46,21 +40,18 @@ class OrderController extends Controller
 
     /**
      * @param OrderRepository $orderRepository
-     * @param IngredientRepository $ingredientRepository
      * @param WareHouseClientService $wareHouseClientService
      * @param PlateRepository $plateRepository
      * @param kitchenService $kitchenService
      */
     public function __construct(
         OrderRepository        $orderRepository,
-        IngredientRepository   $ingredientRepository,
         WareHouseClientService $wareHouseClientService,
         PlateRepository        $plateRepository,
         kitchenService $kitchenService
     )
     {
         $this->orderRepository = $orderRepository;
-        $this->ingredientRepository = $ingredientRepository;
         $this->wareHouseClientService = $wareHouseClientService;
         $this->plateRepository = $plateRepository;
         $this->kitchenService = $kitchenService;
@@ -72,8 +63,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $orders = $this->orderRepository->search(['status' => 'CREATED'])->get();
-
+        $orders = $this->orderRepository->search(['status' => 'CREATED'])->paginate(10);
         return view('layouts.pages.orders', compact('orders'));
     }
 
@@ -83,8 +73,7 @@ class OrderController extends Controller
      */
     public function process(Request $request)
     {
-        $orders = $this->orderRepository->search(['status' => 'PROCESSED'])->get();
-
+        $orders = $this->orderRepository->search(['status' => 'PROCESSED'])->paginate(10);
         return view('layouts.pages.orders', compact('orders'));
     }
 
@@ -103,7 +92,7 @@ class OrderController extends Controller
                 'plate_id' => $plate->id,
                 'status' => "CREATED"
             ]);
-            //$this->kitchenService->prepareDish($order);
+
             $job = (new ProcessOrder($order));
             $this->dispatch($job);
             DB::commit();
