@@ -6,6 +6,7 @@ use App\Services\WareHouseClientService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class IngredientController extends Controller
@@ -29,7 +30,17 @@ class IngredientController extends Controller
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function index(Request $request) {
-        $ingredients = $this->wareHouseClientService->getAllIngredients();
+
+        $page = $request->query('page', 1);
+
+        $pageSize = $request->query('pageSize', 10);
+
+        $allIngredients = $this->wareHouseClientService->getAllIngredients($page, $pageSize);
+
+        $totalResults = $allIngredients->total_results ?? count($allIngredients);
+
+        $ingredients = new LengthAwarePaginator($allIngredients->ingredients, $totalResults, $pageSize, $page);
+
         return view('layouts.pages.ingredients', compact('ingredients'));
     }
 }
