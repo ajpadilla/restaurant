@@ -1,7 +1,9 @@
 <?php
 
+use App\Repositories\Ingredient\EloquentIngredientRepository;
+use App\Repositories\Ingredient\IngredientRepository;
 use Illuminate\Database\Seeder;
-use \App\Repositories\IngredientRepository;
+
 class IngredientSeeder extends Seeder
 {
     /**
