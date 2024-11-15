@@ -1,8 +1,9 @@
 <?php
 
+use App\Repositories\Ingredient\EloquentIngredientRepository;
+use App\Repositories\Plate\PlateRepository;
 use Illuminate\Database\Seeder;
-use App\Repositories\PlateRepository;
-use App\Repositories\IngredientRepository;
+
 class PlateSeeder extends Seeder
 {
     /**
@@ -15,7 +16,7 @@ class PlateSeeder extends Seeder
         define("TOTAL_PLATES", 6);
 
         $plateRepository = app(PlateRepository::class);
-        $ingredientRepository = app(IngredientRepository::class);
+        $ingredientRepository = app(EloquentIngredientRepository::class);
 
         for ($i = 0; $i <= TOTAL_PLATES; $i++) {
             $plateRepository->create(['name' => "Plate {$i}"]);
