@@ -26,7 +26,8 @@ class WareHouseClientService
     {
         //$this->endpoint = 'http://192.168.16.1:8081';
         //$this->endpoint = 'http://warehouse_nginx';
-        $this->endpoint = env('WAREHOUSE_HOST', 'http://warehouse_nginx');
+       // $this->endpoint = env('WAREHOUSE_HOST', 'http://warehouse_nginx');
+        $this->endpoint = env('WAREHOUSE_HOST', 'http://localhost:8081');
         $this->client = $this->createClient();
     }
 
@@ -49,149 +50,43 @@ class WareHouseClientService
      * @throws GuzzleException
      * @throws Exception
      */
-    public function getAllIngredients()
+    public function getAllIngredients($page, $pageSize)
     {
         try {
             /** @var Response $response */
-            $response = $this->client->get('api/warehouse/v1/ingredients');
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @param $name
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function getIngredient($name)
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->get("api/warehouse/v1/ingredients/{$name}");
-        }  catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @param $data
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function increaseIngredients($data)
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->post('api/warehouse/v1/ingredients/increase', [
-                'json' => $data,
+            $response = $this->client->get('api/warehouse/v1/ingredients', [
+                'query' => [
+                    'page' => $page,
+                    'pageSize' => $pageSize,
+                ],
             ]);
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
+            throw new Exception($e->getMessage());
         }
         return json_decode($response->getBody()->getContents());
     }
 
-    public function getIngredients($data)
+    /**
+     * @return mixed
+     * @throws GuzzleException
+     * @throws Exception
+     */
+    public function getAllPurchases($page, $pageSize)
     {
         try {
             /** @var Response $response */
-            $response = $this->client->post('api/warehouse/v1/ingredients/list', [
-                'json' => ['name' => $data],
+            $response = $this->client->post('api/warehouse/v1/purchases', [
+                'json' => [
+                    'page' => $page,
+                    'pageSize' => $pageSize
+                ],
             ]);
         } catch (Exception $e) {
             logger($e->getMessage());
             logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-
-    /**
-     * @param $data
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function decreaseIngredients($data)
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->post('api/warehouse/v1/ingredients/decrease', [
-                'json' => [ 'ingredients' => $data],
-            ]);
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function getAllPurchases()
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->get('api/warehouse/v1/purchases');
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @param $data
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function makePurchase($data)
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->post('api/warehouse/v1/purchases/create', [
-                'json' => $data,
-            ]);
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
-        }
-        return json_decode($response->getBody()->getContents());
-    }
-
-    /**
-     * @return mixed
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function buyIngredient($ingredientName)
-    {
-        try {
-            /** @var Response $response */
-            $response = $this->client->get("api/warehouse/v1/ingredients/buy/{$ingredientName}");
-        }  catch (Exception $e) {
-            logger($e->getMessage());
-            logger($e->getTraceAsString());
-            throw new Exception("Error getting access token");
+            throw new Exception($e->getMessage());
         }
         return json_decode($response->getBody()->getContents());
     }
