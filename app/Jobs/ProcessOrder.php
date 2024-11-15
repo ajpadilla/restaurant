@@ -4,6 +4,9 @@ namespace App\Jobs;
 
 use App\Order;
 use App\Services\kitchenService;
+use App\Services\Messaging\MessageProducerInterface;
+use App\Services\Messaging\RabbitMQ\OrderRabbitMQProducer;
+use App\Services\OrderIngredientService;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
@@ -16,7 +19,6 @@ class ProcessOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
     /**
      * @var Order
      */
@@ -27,6 +29,19 @@ class ProcessOrder implements ShouldQueue
      */
     protected $kitchenService;
 
+
+    /**
+     * @var OrderIngredientService
+     */
+    protected $orderIngredientService;
+
+
+    /**
+     * @var MessageProducerInterface
+     *
+     */
+    protected $messageProducer;
+
     /**
      * Create a new job instance.
      *
@@ -35,6 +50,9 @@ class ProcessOrder implements ShouldQueue
     public function __construct($order)
     {
         $this->order = $order;
+        $this->queue = 'process_order_restaurant';
+        $this->messageProducer = app(OrderRabbitMQProducer::class);
+        $this->orderIngredientService = app(OrderIngredientService::class);
     }
 
     /**
@@ -45,8 +63,8 @@ class ProcessOrder implements ShouldQueue
     public function handle()
     {
         try {
-            $this->kitchenService = app(kitchenService::class);
-            $this->kitchenService->prepareDish($this->order);
+            $orderIngredientsData = $this->orderIngredientService->createIngredientListForKitchen($this->order);
+            $this->messageProducer->sendMessage($orderIngredientsData);
         } catch (Exception $exception) {
             logger("[Order Exception] {$this->order->id}");
             logger($exception->getMessage());
