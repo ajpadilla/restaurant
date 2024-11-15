@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Jobs\TestJob;
 use App\Order;
-use App\Repositories\OrderRepository;
+use App\Repositories\Order\OrderRepository;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Collection;
 
 class kitchenService
 {
@@ -20,70 +23,55 @@ class kitchenService
     protected $orderRepository;
 
     /**
+     * @var OrderIngredientService
+     */
+    protected $orderService;
+
+    /**
      * @param WareHouseClientService $clientService
      * @param OrderRepository $orderRepository
+     * @param OrderIngredientService $orderService
      */
-    public function __construct(WareHouseClientService $clientService, OrderRepository $orderRepository)
+    public function __construct(WareHouseClientService $clientService, OrderRepository $orderRepository, OrderIngredientService $orderService)
     {
         $this->clientService = $clientService;
         $this->orderRepository = $orderRepository;
+        $this->orderService = $orderService;
     }
 
     /**
      * @param Order $order
      * @return void
      * @throws GuzzleException
+     * @throws Exception
      */
     public function prepareDish(Order $order){
-       $ingredientsList = $order->plate->ingredients()->get()->toArray();
-       $missingIngredients = $this->checkIngredients($ingredientsList);
+       $ingredientsListFromOrder = collect($order->plate->ingredients()->get()->toArray());
+       $missingIngredients = $this->checkIngredients($ingredientsListFromOrder);
 
        if (count($missingIngredients) === 0) {
            $this->orderRepository->update($order, ['status' => 'PROCESSED']);
-           $this->decreaseIngredientsInWareHouse($ingredientsList);
+           $this->decreaseIngredientsInWareHouse($ingredientsListFromOrder);
        } else {
-           foreach ($missingIngredients as $missingIngredient) {
-               while ($missingIngredient['ingredient_in_ware_house']->quantity < $missingIngredient['ingredient']['quantity']) {
-                   sleep(3);
-                   $this->buyIngredients($missingIngredient['ingredient']['name']);
-                   $missingIngredient['ingredient_in_ware_house'] = $this->clientService->getIngredient($missingIngredient['ingredient']['name']);
-               }
-           }
-           $this->orderRepository->update($order, ['status' => 'PROCESSED']);
-           $this->decreaseIngredientsInWareHouse($ingredientsList);
+           TestJob::dispatch(['data' => $this->prepareIngredientsListToWarehouse($order, $ingredientsListFromOrder)]);
        }
     }
 
     /**
-     * @param array $ingredientsList
-     * @return void
-     * @throws GuzzleException
-     */
-    private function decreaseIngredientsInWareHouse(array $ingredientsList) {
-        $decreaseIngredientsList = [];
-        foreach ($ingredientsList as $item) {
-            $decreaseIngredientsList[] = ['name' => $item['name'] ,'quantity' => $item['quantity']];
-        }
-        $this->clientService->decreaseIngredients($decreaseIngredientsList);
-    }
-
-    /**
-     * @param array $ingredients
+     * @param Collection $ingredientsListFromOrder
      * @return array
-     * @throws GuzzleException
+     * @throws Exception
      */
-    private function checkIngredients(array $ingredients): array
+    private function checkIngredients(Collection $ingredientsListFromOrder): array
     {
-        $ingredientNames = array_column($ingredients, 'name');
-        $ingredientData = $this->clientService->getIngredients($ingredientNames);
+        $ingredientDataFromWarehouse = $this->clientService->getIngredients($ingredientsListFromOrder->pluck('name')->toArray());
         $missingIngredients = [];
 
-        foreach ($ingredients as $ingredient) {
-            $ingredientName = $ingredient['name'];
-            $ingredientInWareHouse = $this->searchIngredient($ingredientData, $ingredientName);
-            if ($ingredientInWareHouse->quantity == 0 || $ingredientInWareHouse->quantity < $ingredient['quantity']) {
+        foreach ($ingredientsListFromOrder as $ingredientInOrder) {
+            $ingredientInWareHouse = $this->searchIngredient(collect($ingredientDataFromWarehouse), $ingredientInOrder['name']);
+            if ($ingredientInWareHouse->quantity == 0 || $ingredientInWareHouse->quantity < $ingredientInOrder['quantity']) {
                 $missingIngredients[] = [
-                    'ingredient' => $ingredient,
+                    'ingredient' => $ingredientInOrder,
                     'ingredient_in_ware_house' => $ingredientInWareHouse,
                 ];
             }
@@ -93,31 +81,40 @@ class kitchenService
     }
 
 
-    public function searchIngredient($ingredientInWareHouseList, $name) {
-        foreach ($ingredientInWareHouseList as $ingredient) {
-            if ($ingredient->name == $name) {
-                return $ingredient;
-            }
-        }
-        return null;
+    /**
+     * @param Collection $ingredientInWareHouseList
+     * @param $name
+     * @return object|mixed|null
+     */
+    public function searchIngredient(Collection $ingredientInWareHouseList, $name): ?object {
+        return $ingredientInWareHouseList->first(function ($ingredient) use ($name) {
+            return $ingredient->name == $name;
+        });
     }
 
 
     /**
-     * @param $ingredientName
+     * @param Collection $ingredientsList
      * @return void
      * @throws GuzzleException
      */
-    private function buyIngredients($ingredientName) {
-        $response = $this->clientService->buyIngredient($ingredientName);
-        $quantity = $response->quantitySold;
-        if($quantity > 0) {
-            $this->clientService->increaseIngredients(['name' => $ingredientName ,'quantity' => $quantity]);
-            $this->clientService->makePurchase([
-                'description' => "Buy {$ingredientName}",
-                'product_name' => $ingredientName,
-                'quantity' => $quantity
-            ]);
-        }
+    private function decreaseIngredientsInWareHouse(Collection $ingredientsList) {
+        $decreaseIngredientsList = $ingredientsList->map(function ($item) {
+            return['name' => $item['name'], 'quantity' => $item['quantity']];
+        });
+        $this->clientService->decreaseIngredients($decreaseIngredientsList);
+    }
+
+    /**
+     * @param Order $order
+     * @param Collection $ingredientsListFromOrder
+     * @return array
+     */
+    function prepareIngredientsListToWarehouse(Order $order, Collection $ingredientsListFromOrder): array
+    {
+        $ingredients = $ingredientsListFromOrder->map(function ($item) {
+            return['name' => $item['name'], 'quantity' => $item['quantity']];
+        })->toArray();
+        return['order_id' => $order->id, 'ingredients' => $ingredients];
     }
 }
