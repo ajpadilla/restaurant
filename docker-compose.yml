@@ -31,6 +31,7 @@ services:
     depends_on:
       - mariadb
       - redis
+      - rabbitmq
     networks:
       - shared_network
 
@@ -55,7 +56,20 @@ services:
     volumes:
       - ./docker/data/mariadb:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
+    networks:
+      - shared_network
+
+
+  rabbitmq:
+    container_name: laravel_rabbitmq
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"   # Puerto para el protocolo AMQP (para conectar la aplicación)
+      - "15672:15672" # Puerto para la interfaz de administración de RabbitMQ
     networks:
       - shared_network
 
