@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\PlateRepository;
+use App\Repositories\Plate\PlateRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\Request;
@@ -23,7 +23,9 @@ class PlateController extends Controller
      */
     public function index(Request $request)
     {
-        $plates = $this->plateRepository->search([])->get();
+       // dd(DB::connection()->getDatabaseName());
+
+        $plates =  $this->plateRepository->search([])->get();
 
         return view('layouts.pages.plates', compact('plates'));
     }
