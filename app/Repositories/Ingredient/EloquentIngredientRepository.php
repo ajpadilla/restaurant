@@ -1,18 +1,25 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Ingredient;
 
 use App\Ingredient;
+use App\Repositories\AbstractRepository;
 use Illuminate\Support\Collection;
 
-class IngredientRepository extends AbstractRepository
+class EloquentIngredientRepository implements IngredientRepository
 {
     /**
+     * @var Ingredient
+     */
+    private $ingredient;
+
+    /**
+     * IngredientRepository constructor.
      * @param Ingredient $model
      */
     function __construct(Ingredient $model)
     {
-        $this->model = $model;
+        $this->ingredient = $model;
     }
 
     /**
@@ -29,6 +36,44 @@ class IngredientRepository extends AbstractRepository
         }
     }
 
+
+    /**
+     * @param array $input
+     * @return Ingredient
+     */
+    function create(array $input): Ingredient
+    {
+        return $this->ingredient->create($input);
+    }
+
+    /**
+     * @param $id
+     * @return Order|null
+     */
+    public function getById($id): ?Ingredient
+    {
+        return $this->ingredient->findOrFail($id);
+    }
+
+    /**
+     * @param Ingredient $ingredient
+     * @param array $attributes
+     * @return bool
+     */
+    public function update(Ingredient $ingredient, array $attributes): bool
+    {
+        return $ingredient->update($attributes);
+    }
+
+    /**
+     * @param Ingredient $ingredient
+     * @return bool|null
+     */
+    public function delete(Ingredient $ingredient): ?bool
+    {
+        return $ingredient->delete();
+    }
+
     /**
      * @param array $filters
      * @param bool $count
@@ -36,12 +81,11 @@ class IngredientRepository extends AbstractRepository
      */
     public function search(array $filters = [], bool $count = false)
     {
-        $query = $this->model
+        $query = $this->ingredient
             ->distinct()
             ->select('ingredients.*');
 
         $joins = collect();
-
 
         $joins->each(function ($item, $key) use (&$query) {
             $item = json_decode($item);
