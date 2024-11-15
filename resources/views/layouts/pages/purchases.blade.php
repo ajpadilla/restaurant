@@ -42,6 +42,8 @@
                     <p>No items</p>
                 @endforelse
                 </tbody>
+
             </table>
+            {{ $purchases->setPath('/purchases')->appends(['page' => $purchases->currentPage(), 'pageSize' => $purchases->perPage()])->links() }}
         </div>
         @stop

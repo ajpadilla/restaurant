@@ -44,5 +44,6 @@
                 @endforelse
                 </tbody>
             </table>
+            {{ $ingredients->setPath('/ingredients')->appends(['page' => $ingredients->currentPage(), 'pageSize' => $ingredients->perPage()])->links() }}
         </div>
         @stop

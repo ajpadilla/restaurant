@@ -18,7 +18,6 @@
         </div>
     @endif
 
-    </form>
     <div class="well">
         <table class="table">
             <thead>
@@ -47,4 +46,10 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Enlaces de paginación -->
+    <div class="d-flex justify-content-center">
+        {{ $orders->links() }}
+    </div>
+
 @stop
